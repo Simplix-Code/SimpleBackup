@@ -6,7 +6,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -34,19 +36,17 @@ jobs:
           from pathlib import Path
           import re
           text = Path("setup.py").read_text()
-          m = re.search(r'version=["\']([^"\']+)["\']', text)
+          m = re.search(r"version=['"]([^'"]+)['"]", text)
           print(m.group(1) if m else "0.0.0")
           PY
           )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Detected version: $VERSION"
 
-      - name: Build .deb (Debian 11)
+      - name: Build .deb
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
           echo "Building deb version $VERSION"
 
-          # 1) DEBIAN/control
           mkdir -p dist-deb/DEBIAN
           cat > dist-deb/DEBIAN/control <<EOF
           Package: simplebackup
@@ -58,41 +58,18 @@ jobs:
           Description: SimpleBackup CLI tool
           EOF
 
-          # 2) Python-Paket da hin, wo deine Runtime (3.11) es findet
-          mkdir -p dist-deb/usr/lib/python3.11/dist-packages
-          python -m pip install . --target dist-deb/usr/lib/python3.11/dist-packages
-
-          # 3) robusten Wrapper rein (der gerade bei dir funktioniert hat)
+          mkdir -p dist-deb/usr/lib/simplebackup
           mkdir -p dist-deb/usr/bin
+
+          python -m pip install . --target dist-deb/usr/lib/simplebackup
+
           cat > dist-deb/usr/bin/simplebackup <<'EOF'
-          #!/usr/bin/env python3
-          import os
-          import sys
-
-          CANDIDATE_PATHS = [
-              "/usr/lib/python3.11/dist-packages",
-              "/usr/lib/python3/dist-packages",
-              "/usr/lib/simplebackup",
-              "/usr/lib/simplebackup/SimpleBackUp",
-          ]
-
-          for path in CANDIDATE_PATHS:
-              if os.path.isdir(path) and path not in sys.path:
-                  sys.path.insert(0, path)
-
-          from SimpleBackUp.__main__ import main
-
-          if __name__ == "__main__":
-              main()
+          #!/usr/bin/env bash
+          python3 -m SimpleBackUp "$@"
           EOF
           chmod +x dist-deb/usr/bin/simplebackup
 
-          # 4) Config mitliefern
-          mkdir -p dist-deb/etc/SimpleBackUp
-          cp backup_config.json dist-deb/etc/SimpleBackUp/backup_config.json
-
-          # 5) Für Debian 11: gzip nutzen
-          dpkg-deb -Zgzip --root-owner-group --build dist-deb "simplebackup_${VERSION}_all.deb"
+          dpkg-deb --build dist-deb "simplebackup_${VERSION}_all.deb"
 
       - name: Build APT directory
         run: |
@@ -103,11 +80,16 @@ jobs:
           dpkg-scanpackages . /dev/null > Packages
           gzip -k -f Packages
 
-      # deploy direkt auf gh-pages (um Env-Schutz zu umgehen)
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./public
-          force_orphan: true
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

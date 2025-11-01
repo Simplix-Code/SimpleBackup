@@ -70,7 +70,7 @@ jobs:
           EOF
           chmod +x dist-deb/usr/bin/simplebackup
 
-          dpkg-deb --build dist-deb "simplebackup_${VERSION}_all.deb"
+          dpkg-deb -Zgzip --root-owner-group --build dist-deb "simplebackup_${VERSION}_all.deb"
 
       - name: Build APT directory
         run: |

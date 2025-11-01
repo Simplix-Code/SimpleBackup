@@ -11,7 +11,7 @@ def main():
 
     cmd = sys.argv[1].lower()
 
-    # SimpleBackUp run -> daemon starten (für screen)
+    # SimpleBackUp run   -> daemon starten (für screen)
     if cmd == "run":
         backup.run_daemon()
         return
@@ -77,43 +77,54 @@ def main():
         SimpleBackUp - Commands & Usage
         ==================================
 
-        Command: simplebackup create job <NAME> <TIME> <DURATION>
-        Example: simplebackup create job Website 03:00 1D
+        Job Management:
+        simplebackup create job <NAME> <TIME> <DURATION>
+            Creates a new backup job.
+            Example: simplebackup create job Website 03:00 1D
 
-        Command: simplebackup add source <JOBNAME> <PATH> [EXCLUDES]
-        Example: simplebackup add source Website /var/www "node_modules,.git,static/cache"
+        simplebackup add source <JOBNAME> <PATH> [EXCLUDES]
+            Adds a source to a job.
+            Example: simplebackup add source Website /var/www "node_modules,.git"
 
-        Command: simplebackup remove source <JOBNAME> <PATH>
-        Example: simplebackup remove source Website /var/www
+        simplebackup remove source <JOBNAME> <PATH>
+            Removes a source for one job.
 
-        Command: simplebackup delete job <NAME>
-        Example: simplebackup delete job Website
+        simplebackup delete job <NAME>
+            Deletes a job completely.
 
-        Command: simplebackup edit job <NAME> [time=HH:MM] [duration=1D]
-        Example 1: simplebackup edit job Website time=04:00
-        Example 2: simplebackup edit job Website duration=2D
-        Example 3: simplebackup edit job Website time=04:00 duration=2D
+        simplebackup edit job <NAME> [time=HH:MM] [duration=1D]
+            Edits the time and/or interval of a job.
+            Alternatively:
+                simplebackup edit job <NAME> <TIME> [DURATION]
+            Example:
+                simplebackup edit job Website 22:00 2D
 
-        Command: simplebackup show [JOBNAME]
-        Example 1: simplebackup show Website
+        simplebackup show [JOBNAME]
+            Shows all jobs or details for a specific job.
 
-        Command: simplebackup start
-        Description: Starts the backup service (in a screen session).
+        Backup Control:
+        simplebackup start
+            Starts the backup service (in a screen session).
 
-        Command: simplebackup stop
-        Description: Stops the backup service.
+        simplebackup stop
+            Stops the backup service.
 
-        Command: simplebackup restart
-        Description: Restarts the backup service (stop + start).
+        simplebackup restart
+            Restarts the backup service (stop + start).
 
-        Command: simplebackup help
-        Description: Shows this overview.
+        General:
+        simplebackup help
+            Shows this overview.
 
         Configuration:
-        Path: /etc/SimpleBackUp/backup_config.json
-        Description: All jobs and sources are stored here.
+        /etc/SimpleBackUp/backup_config.json
+            All jobs and sources are stored here.
         """)
         return
 
-    print("Unknown command.")
-    print("Use 'simplebackup help' to see a list of all commands:")
+    print("Unbekannter Befehl.")
+    print("Beispiele:")
+    print("  SimpleBackUp create job NAME 03:00 1D")
+    print("  SimpleBackUp add source NAME /pfad \"node_modules,.git\"")
+    print("  SimpleBackUp show [NAME]")
+    print("  SimpleBackUp start|stop|restart")

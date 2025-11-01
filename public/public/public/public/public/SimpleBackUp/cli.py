@@ -5,7 +5,7 @@ def create_job(name, time_str, duration):
     cfg, _ = load_config()
     jobs = cfg.setdefault("jobs", [])
     if any(j["name"] == name for j in jobs):
-        raise SystemExit(f"Job {name} already exists.")
+        raise SystemExit(f"Job {name} existiert schon.")
     jobs.append({
         "name": name,
         "time": time_str,
@@ -13,14 +13,14 @@ def create_job(name, time_str, duration):
         "sources": []
     })
     save_config(cfg)
-    print(f"[OK] Job {name} created.")
+    print(f"[OK] Job {name} angelegt.")
 
 def add_source(jobname, src_path, excludes_str="-"):
     cfg, _ = load_config()
     jobs = cfg.get("jobs", [])
     job = next((j for j in jobs if j["name"] == jobname), None)
     if not job:
-        raise SystemExit(f"Job {jobname} not found.")
+        raise SystemExit(f"Job {jobname} nicht gefunden.")
     if "sources" not in job:
         job["sources"] = []
     excludes = []
@@ -28,7 +28,7 @@ def add_source(jobname, src_path, excludes_str="-"):
         excludes = [x.strip() for x in excludes_str.split(",") if x.strip()]
     job["sources"].append({"path": src_path, "exclude": excludes})
     save_config(cfg)
-    print(f"[OK] Source to {jobname} added.")
+    print(f"[OK] Source zu {jobname} hinzugefügt.")
 
 def show(jobname=None):
     cfg, _ = load_config()
@@ -37,7 +37,7 @@ def show(jobname=None):
         return
     job = next((j for j in cfg.get("jobs", []) if j["name"] == jobname), None)
     if not job:
-        raise SystemExit(f"Job {jobname} not found.")
+        raise SystemExit(f"Job {jobname} nicht gefunden.")
     print(json.dumps(job, indent=2))
 
 def delete_job(jobname):
@@ -45,10 +45,10 @@ def delete_job(jobname):
     jobs = cfg.get("jobs", [])
     new_jobs = [j for j in jobs if j["name"] != jobname]
     if len(new_jobs) == len(jobs):
-        raise SystemExit(f"Job {jobname} not found.")
+        raise SystemExit(f"Job {jobname} nicht gefunden.")
     cfg["jobs"] = new_jobs
     save_config(cfg)
-    print(f"[OK] Job {jobname} deleted.")
+    print(f"[OK] Job {jobname} gelöscht.")
 
 def remove_source(jobname, source_path):
     cfg, _ = load_config()
@@ -72,7 +72,7 @@ def edit_job(jobname, time_str=None, duration=None):
     jobs = cfg.get("jobs", [])
     job = next((j for j in jobs if j["name"] == jobname), None)
     if not job:
-        raise SystemExit(f"Job {jobname} not found.")
+        raise SystemExit(f"Job {jobname} nicht gefunden.")
 
     old_time = job.get("time", "-")
     old_cycle = job.get("cycle", "-")
@@ -83,6 +83,6 @@ def edit_job(jobname, time_str=None, duration=None):
         job["cycle"] = duration
 
     save_config(cfg)
-    print(f"[OK] Job {jobname} edited.")
+    print(f"[OK] Job {jobname} aktualisiert.")
     print(f"  Zeit: {old_time} → {job['time']}")
     print(f"  Dauer: {old_cycle} → {job['cycle']}")

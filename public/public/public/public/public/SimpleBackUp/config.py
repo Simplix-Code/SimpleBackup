@@ -12,7 +12,7 @@ def find_config_path_for_read():
     for path in DEFAULT_CONFIG_PATHS:
         if os.path.exists(path):
             return path
-    raise FileNotFoundError("No backup_config.json was found!")
+    raise FileNotFoundError("Keine backup_config.json gefunden.")
 
 
 def find_config_path_for_write():
