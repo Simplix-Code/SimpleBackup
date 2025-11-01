@@ -36,11 +36,12 @@ jobs:
           from pathlib import Path
           import re
           text = Path("setup.py").read_text()
-          m = re.search(r"version=['"]([^'"]+)['"]", text)
+          m = re.search(r'version=["\']([^"\']+)["\']', text)
           print(m.group(1) if m else "0.0.0")
           PY
           )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
 
       - name: Build .deb
         run: |

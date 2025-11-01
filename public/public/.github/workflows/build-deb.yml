@@ -36,12 +36,11 @@ jobs:
           from pathlib import Path
           import re
           text = Path("setup.py").read_text()
-          m = re.search(r'version=["\']([^"\']+)["\']', text)
+          m = re.search(r"version=['"]([^'"]+)['"]", text)
           print(m.group(1) if m else "0.0.0")
           PY
           )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Detected version: $VERSION"
 
       - name: Build .deb
         run: |
@@ -70,7 +69,7 @@ jobs:
           EOF
           chmod +x dist-deb/usr/bin/simplebackup
 
-          dpkg-deb -Zgzip --root-owner-group --build dist-deb "simplebackup_${VERSION}_all.deb"
+          dpkg-deb --build dist-deb "simplebackup_${VERSION}_all.deb"
 
       - name: Build APT directory
         run: |
