@@ -1,0 +1,13 @@
+Package: simplebackup
+Version: 0.1.4
+Architecture: all
+Maintainer: Simplix-Code <noreply@example.com>
+Filename: ./simplebackup_0.1.4_all.deb
+Size: 15644
+MD5sum: 32ad5154bedd9fe3344904dd92445b4c
+SHA1: 09ceea60820927bdb0d88c0e91b19dbd883a0b76
+SHA256: 556184b259e95368849f5263b82ab1f0422137474ed53ce45216240c76e79827
+Section: utils
+Priority: optional
+Description: SimpleBackup CLI tool
+
