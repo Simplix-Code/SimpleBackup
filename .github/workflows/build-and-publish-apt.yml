@@ -1,4 +1,4 @@
-name: Build and publish APT repo to GitHub Pages
+name: Build and publish APT repository to GitHub Pages
 
 on:
   push:
