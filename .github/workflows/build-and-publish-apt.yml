@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -99,3 +101,19 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./public
           force_orphan: true
+
+      - name: Commit built public back to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # public hinzufügen
+          git add public
+
+          # nur committen, wenn sich wirklich was geändert hat
+          if ! git diff --cached --quiet; then
+            git commit -m "update public (apt) from CI"
+            git push origin main
+          else
+            echo "no changes in public/"
+          fi
