@@ -39,14 +39,12 @@ jobs:
           PY
           )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Detected version: $VERSION"
 
       - name: Build .deb (Debian 11)
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
           echo "Building deb version $VERSION"
 
-          # 1) DEBIAN/control
           mkdir -p dist-deb/DEBIAN
           cat > dist-deb/DEBIAN/control <<EOF
           Package: simplebackup
@@ -58,52 +56,42 @@ jobs:
           Description: SimpleBackup CLI tool
           EOF
 
-          # 2) Python-Paket da hin, wo deine Runtime (3.11) es findet
           mkdir -p dist-deb/usr/lib/python3.11/dist-packages
           python -m pip install . --target dist-deb/usr/lib/python3.11/dist-packages
 
-          # 3) robusten Wrapper rein (der gerade bei dir funktioniert hat)
           mkdir -p dist-deb/usr/bin
           cat > dist-deb/usr/bin/simplebackup <<'EOF'
           #!/usr/bin/env python3
-          import os
-          import sys
-
+          import os, sys
           CANDIDATE_PATHS = [
               "/usr/lib/python3.11/dist-packages",
               "/usr/lib/python3/dist-packages",
               "/usr/lib/simplebackup",
               "/usr/lib/simplebackup/SimpleBackUp",
           ]
-
-          for path in CANDIDATE_PATHS:
-              if os.path.isdir(path) and path not in sys.path:
-                  sys.path.insert(0, path)
-
+          for p in CANDIDATE_PATHS:
+              if os.path.isdir(p) and p not in sys.path:
+                  sys.path.insert(0, p)
           from SimpleBackUp.__main__ import main
-
           if __name__ == "__main__":
               main()
           EOF
           chmod +x dist-deb/usr/bin/simplebackup
 
-          # 4) Config mitliefern
           mkdir -p dist-deb/etc/SimpleBackUp
           cp backup_config.json dist-deb/etc/SimpleBackUp/backup_config.json
 
-          # 5) Für Debian 11: gzip nutzen
           dpkg-deb -Zgzip --root-owner-group --build dist-deb "simplebackup_${VERSION}_all.deb"
 
       - name: Build APT directory
         run: |
+          rm -rf public
           mkdir -p public/apt
           cp simplebackup_*_all.deb public/apt/
-
           cd public/apt
           dpkg-scanpackages . /dev/null > Packages
           gzip -k -f Packages
 
-      # deploy direkt auf gh-pages (um Env-Schutz zu umgehen)
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
